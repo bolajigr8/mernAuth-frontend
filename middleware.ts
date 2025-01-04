@@ -19,7 +19,7 @@ export default async function middleware(req: NextRequest) {
   if (isProtectedRoute) {
     if (!accessToken) {
       console.log(`Redirecting to login: Path = ${path}`)
-      return NextResponse.redirect(new URL('/', req.nextUrl))
+      return NextResponse.redirect(new URL('/register', req.nextUrl))
     }
   }
 
