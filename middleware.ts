@@ -19,16 +19,17 @@ export default async function middleware(req: NextRequest) {
   if (isProtectedRoute) {
     if (!accessToken) {
       console.log(`Redirecting to login: Path = ${path}`)
-      return NextResponse.redirect(new URL('/register', req.nextUrl))
+
+      return NextResponse.redirect(new URL('/signup', req.nextUrl))
     }
   }
 
   if (isPublicRoute && accessToken) {
     console.log(`Redirecting to home: Path = ${path}`)
-    if (path !== '/home') {
-      // Prevent redirecting to '/home' when already on it
-      return NextResponse.redirect(new URL('/home', req.nextUrl))
-    }
+    // if (path !== '/home') {
+    //   // Prevent redirecting to '/home' when already on it
+    //   return NextResponse.redirect(new URL('/home', req.nextUrl))
+    // }
   }
 
   // Allow all other routes to proceed
