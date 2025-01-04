@@ -67,6 +67,7 @@ export default function Login() {
     mutate(values, {
       // Call the login API with the form values (email and password).
       onSuccess: (response) => {
+        console.log('login success')
         // Handle success response from the API.
         if (response.data.mfaRequired) {
           // If Multi-Factor Authentication (MFA) is required:
@@ -78,6 +79,8 @@ export default function Login() {
         // If MFA is not required, redirect to the home page.
       },
       onError: (error) => {
+        console.log('login error', error.message)
+
         // Handle error response from the API.
         toast({
           title: 'Error', // Title of the error toast.
