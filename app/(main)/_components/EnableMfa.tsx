@@ -3,7 +3,7 @@
 import React, { useCallback, useState } from 'react'
 import { z } from 'zod'
 import { Check, Copy, Loader } from 'lucide-react'
-im { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {

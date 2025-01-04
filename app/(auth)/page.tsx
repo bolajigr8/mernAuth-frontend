@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { ArrowRight, Loader } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
-im { z } from 'zod'
+import { z } from 'zod'
 import Link from 'next/link'
 import {
   Form,
