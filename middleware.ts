@@ -23,7 +23,7 @@ export default async function middleware(req: NextRequest) {
       .find((cookie) => cookie.startsWith('accessToken='))
       ?.split('=')[1]
 
-  if (!accessToken && path !== '/signup' && path !== '/home') {
+  if (!accessToken) {
     accessToken = 'newAccessTokenValue' // Replace with actual token generation logic
     const response = NextResponse.next()
     response.cookies.set('accessToken', accessToken, {
@@ -38,7 +38,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/signup', req.nextUrl))
   }
 
-  if (isPublicRoute && accessToken && path !== '/logout') {
+  if (isPublicRoute && accessToken) {
     return NextResponse.redirect(new URL('/home', req.nextUrl))
   }
 
