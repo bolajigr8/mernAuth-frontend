@@ -23,7 +23,7 @@ export default async function middleware(req: NextRequest) {
       .find((cookie) => cookie.startsWith('accessToken='))
       ?.split('=')[1]
 
-  if (!accessToken) {
+  if (!accessToken && path !== '/signup' && path !== '/home') {
     accessToken = 'newAccessTokenValue' // Replace with actual token generation logic
     const response = NextResponse.next()
     response.cookies.set('accessToken', accessToken, {
