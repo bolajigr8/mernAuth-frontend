@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { toast } from '@/hooks/use-toast'
-import logoutMutationFn from '@/lib/api'
+import { logoutMutationFn } from '@/lib/api'
 import { useMutation } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -36,7 +36,7 @@ const LogoutDialog = (props: {
   })
 
   const handleLogout = useCallback(() => {
-    mutate('logout')
+    mutate()
   }, [])
   return (
     <>
