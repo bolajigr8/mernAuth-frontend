@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Logo from '@/components/logo'
-import { loginMutationFn } from '@/lib/api'
+import loginMutationFn from '@/lib/api'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/hooks/use-toast'
 
@@ -25,9 +25,13 @@ import { toast } from '@/hooks/use-toast'
 export default function Login() {
   const router = useRouter() // Get Next.js router instance for navigation.
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending } = useMutation<
+    { data: { mfaRequired: boolean } },
+    Error,
+    { email: string; password: string }
+  >({
     // Initialize a mutation for the login API.
-    mutationFn: loginMutationFn, // Function to perform the login API request.
+    mutationFn: (variables) => loginMutationFn('/login', { data: variables }), // Function to perform the login API request.
   })
 
   // Define a schema for form validation using Zod.
@@ -66,7 +70,7 @@ export default function Login() {
 
     mutate(values, {
       // Call the login API with the form values (email and password).
-      onSuccess: (response) => {
+      onSuccess: (response: { data: { mfaRequired: boolean } }) => {
         console.log('login success')
 
         // Define the type for the cookie object

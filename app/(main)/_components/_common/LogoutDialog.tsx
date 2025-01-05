@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -6,38 +6,38 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
-import { logoutMutationFn } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useCallback } from "react";
+} from '@/components/ui/dialog'
+import { toast } from '@/hooks/use-toast'
+import logoutMutationFn from '@/lib/api'
+import { useMutation } from '@tanstack/react-query'
+import { Loader } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import React, { useCallback } from 'react'
 
 const LogoutDialog = (props: {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
-  const { isOpen, setIsOpen } = props;
+  const { isOpen, setIsOpen } = props
 
-  const router = useRouter();
+  const router = useRouter()
   const { mutate, isPending } = useMutation({
     mutationFn: logoutMutationFn,
     onSuccess: () => {
-      router.replace("/");
+      router.replace('/')
     },
     onError: (error) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive",
-      });
+        variant: 'destructive',
+      })
     },
-  });
+  })
 
   const handleLogout = useCallback(() => {
-    mutate();
-  }, []);
+    mutate('logout')
+  }, [])
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -52,18 +52,18 @@ const LogoutDialog = (props: {
           <DialogFooter>
             <Button
               disabled={isPending}
-              type="button"
-              className="!text-white"
+              type='button'
+              className='!text-white'
               onClick={handleLogout}
             >
-              {isPending && <Loader className="animate-spin" />}
+              {isPending && <Loader className='animate-spin' />}
               Yes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  );
-};
+  )
+}
 
-export default LogoutDialog;
+export default LogoutDialog
