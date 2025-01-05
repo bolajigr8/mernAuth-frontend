@@ -15,7 +15,24 @@ export default async function middleware(req: NextRequest) {
   const isProtectedRoute = protectedRoutes.includes(path)
   const isPublicRoute = publicRoutes.includes(path)
 
-  const accessToken = res.cookies.get('accessToken')?.value
+  let accessToken =
+    req.cookies.get('accessToken')?.value ||
+    req.headers
+      .get('cookie')
+      ?.split('; ')
+      .find((cookie) => cookie.startsWith('accessToken='))
+      ?.split('=')[1]
+
+  if (!accessToken) {
+    accessToken = 'newAccessTokenValue' // Replace with actual token generation logic
+    const response = NextResponse.next()
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+    })
+    return response
+  }
 
   if (isProtectedRoute && !accessToken) {
     return NextResponse.redirect(new URL('/signup', req.nextUrl))
