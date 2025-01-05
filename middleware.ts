@@ -38,7 +38,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/signup', req.nextUrl))
   }
 
-  if (isPublicRoute && accessToken) {
+  if (isPublicRoute && accessToken && path !== '/logout') {
     return NextResponse.redirect(new URL('/home', req.nextUrl))
   }
 
