@@ -1,106 +1,112 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import API from './axios-client'
+// Importing the Axios client instance for making API requests
 
-// Define the configuration options for Axios instances
-const options: AxiosRequestConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL, // Base API URL from environment variables
-  withCredentials: true, // Include cookies in requests
-  timeout: 10000, // Set timeout for requests
+// Defining type for forgot password data
+type forgotPasswordType = { email: string }
+
+// Defining type for reset password data
+type resetPasswordType = { password: string; verificationCode: string }
+
+// Defining type for login credentials
+type LoginType = {
+  email: string
+  password: string
 }
 
-// Create Axios instances for main API and refresh logic
-const API = axios.create(options)
-export const APIRefresh = axios.create(options)
-
-// Define helper functions with proper TypeScript types
-
-/**
- * Get the value of a cookie by its name.
- * @param name - The name of the cookie.
- * @returns The cookie value or undefined if not found.
- */
-const getCookie = (name: string): string | undefined => {
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) return parts.pop()?.split(';').shift()
-  return undefined
+// Defining type for user registration data
+type registerType = {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
 }
 
-/**
- * Set a cookie with the specified options.
- * @param name - The name of the cookie.
- * @param value - The value of the cookie.
- * @param options - Additional options for the cookie.
- */
-const setCookie = (
-  name: string,
-  value: string,
-  options: {
-    httpOnly?: boolean
-    secure?: boolean
-    sameSite?: 'Lax' | 'Strict' | 'None'
-    expires?: Date
-  } = {}
-): void => {
-  let cookieString = `${name}=${value}; Path=/`
-  if (options.httpOnly) cookieString += '; HttpOnly' // Note: Cannot be set client-side
-  if (options.secure) cookieString += '; Secure'
-  if (options.sameSite) cookieString += `; SameSite=${options.sameSite}`
-  if (options.expires)
-    cookieString += `; Expires=${options.expires.toUTCString()}`
-  document.cookie = cookieString
+// Defining type for email verification data
+type verifyEmailType = { code: string }
+
+// Defining type for multi-factor authentication (MFA) verification data
+type verifyMFAType = { code: string; secretKey: string }
+
+// Defining type for MFA login data
+type mfaLoginType = { code: string; email: string }
+
+// Defining type for a single session data structure
+type SessionType = {
+  _id: string
+  userId: string
+  userAgent: string
+  createdAt: string
+  expiresAt: string
+  isCurrent: boolean
 }
 
-// Interceptor for handling token refresh
-APIRefresh.interceptors.response.use(
-  (response: AxiosResponse) => response, // Return response as-is for successful requests
-  (error: AxiosError) => {
-    console.error('APIRefresh error:', error)
-    return Promise.reject(error) // Reject other errors
-  }
-)
+// Defining type for the session response, including a message and an array of sessions
+type SessionResponseType = {
+  message: string
+  sessions: SessionType[]
+}
 
-// Main API instance response interceptor for handling token expiration
-API.interceptors.response.use(
-  (response: AxiosResponse) => response, // Return successful response
-  async (error: AxiosError) => {
-    if (!error.response) {
-      console.error('Network or unknown error:', error)
-      return Promise.reject(error)
-    }
+// Defining type for MFA setup response data
+export type mfaType = {
+  message: string
+  secret: string
+  qrImageUrl: string
+}
 
-    const { data, status } = error.response as {
-      data: { errorCode?: string }
-      status: number
-    }
-    console.log(data, 'Error Data')
+// Function for logging in a user
+export const loginMutationFn = async (data: LoginType) =>
+  await API.post('/auth/login', data)
 
-    // Handle expired or missing token (401)
-    if (status === 401 && data?.errorCode === 'AUTH_TOKEN_NOT_FOUND') {
-      try {
-        const refreshResponse = await APIRefresh.get<{ accessToken: string }>(
-          '/auth/refresh'
-        )
-        const newAccessToken = refreshResponse.data.accessToken
+// Function for registering a new user
+export const registerMutationFn = async (data: registerType) =>
+  await API.post(`/auth/register`, data)
 
-        // Set the refreshed token in cookies
-        setCookie('accessToken', newAccessToken, {
-          secure: process.env.NODE_ENV === 'production', // Use Secure in production
-          sameSite: 'Lax', // SameSite attribute
-          expires: new Date(Date.now() + 3600 * 1000), // 1-hour expiry
-        })
+// Function for verifying a user's email
+export const verifyEmailMutationFn = async (data: verifyEmailType) =>
+  await API.post(`/auth/verify/email`, data)
 
-        // Retry the original request with the new token
-        if (error.config) {
-          error.config.headers.set('Authorization', `Bearer ${newAccessToken}`)
-          return API(error.config)
-        }
-      } catch (refreshError) {
-        console.error('Token refresh failed', refreshError)
-        window.location.href = '/' // Redirect to home if refresh fails
-      }
-    }
-    return Promise.reject(error) // Reject the promise for other errors
-  }
-)
+// Function for requesting a password reset email
+export const forgotPasswordMutationFn = async (data: forgotPasswordType) =>
+  await API.post(`/auth/forgot/password`, data)
 
-export default API
+// Function for resetting a user's password using a verification code
+export const resetPasswordMutationFn = async (data: resetPasswordType) =>
+  await API.post(`/auth/password/reset`, data)
+
+// Function for verifying MFA during login
+export const verifyMFALoginMutationFn = async (data: mfaLoginType) =>
+  await API.post(`/mfa/verify-login`, data)
+
+// Function for logging out the current user
+export const logoutMutationFn = async () => await API.post(`/auth/logout`)
+
+// Function for setting up MFA for a user
+export const mfaSetupQueryFn = async () => {
+  const response = await API.get<mfaType>(`/mfa/setup`)
+  return response.data
+}
+
+// Function for verifying the MFA setup
+export const verifyMFAMutationFn = async (data: verifyMFAType) =>
+  await API.post(`/mfa/verify`, data)
+
+// Function for revoking MFA for a user
+export const revokeMFAMutationFn = async () => await API.put(`/mfa/revoke`, {})
+
+// Function for retrieving the current user session data
+export const getUserSessionQueryFn = async () => await API.get(`/session/`)
+
+// Function for retrieving all user sessions
+export const sessionsQueryFn = async () => {
+  const response = await API.get<SessionResponseType>(`/session/all`)
+  return response.data
+}
+
+// Function for deleting a specific session by its ID
+export const sessionDelMutationFn = async (id: string) =>
+  await API.delete(`/session/${id}`)
+
+// Summary:
+// This code provides a comprehensive set of API utility functions to manage user authentication, sessions, and multi-factor authentication (MFA).
+// It includes functions for login, registration, email verification, password reset, MFA setup and verification, session retrieval, and deletion.
+// Strongly typed structures ensure data consistency across all operations.
