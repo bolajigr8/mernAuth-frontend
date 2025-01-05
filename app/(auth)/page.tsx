@@ -68,6 +68,27 @@ export default function Login() {
       // Call the login API with the form values (email and password).
       onSuccess: (response) => {
         console.log('login success')
+
+        // Define the type for the cookie object
+        type CookieObject = Record<string, string>
+
+        // Get all cookies as a string
+        const cookies: string = document.cookie
+
+        // Split the string into individual cookies
+        const cookieArray: string[] = cookies.split('; ')
+
+        // Convert the cookies into a key-value pair object
+        const cookieObject: CookieObject = {}
+        cookieArray.forEach((cookie: string) => {
+          const [key, value] = cookie.split('=')
+          if (key && value) {
+            cookieObject[key] = value
+          }
+        })
+
+        console.log('cookies', cookieObject)
+
         // Handle success response from the API.
         if (response.data.mfaRequired) {
           // If Multi-Factor Authentication (MFA) is required:
